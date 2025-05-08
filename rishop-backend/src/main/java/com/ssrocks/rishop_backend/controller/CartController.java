@@ -1,6 +1,6 @@
-package com.ssrocks.ecom_backend.controller;
+package com.ssrocks.rishop_backend.controller;
 
-import com.ssrocks.ecom_backend.service.ProductService;
+import com.ssrocks.rishop_backend.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

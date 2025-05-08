@@ -1,4 +1,4 @@
-package com.ssrocks.ecom_backend.model;
+package com.ssrocks.rishop_backend.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;

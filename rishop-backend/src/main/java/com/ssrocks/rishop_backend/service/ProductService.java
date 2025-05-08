@@ -1,7 +1,7 @@
-package com.ssrocks.ecom_backend.service;
+package com.ssrocks.rishop_backend.service;
 
-import com.ssrocks.ecom_backend.model.Product;
-import com.ssrocks.ecom_backend.repository.ProductRepository;
+import com.ssrocks.rishop_backend.model.Product;
+import com.ssrocks.rishop_backend.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
