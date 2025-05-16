@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import API from "../axios";
 import AppContext from "../Context/Context";
@@ -116,7 +116,6 @@ const UpdateProduct = () => {
       }
 
       // Create form data object for multipart/form-data
-      const productFormData = new FormData();
       
       // Convert formData to JSON and add as a product part
       const productJson = JSON.stringify({

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import { useState, useEffect, useContext, useRef } from 'react';
 import { useLocation, useNavigationType } from 'react-router-dom';
 import AppContext from '../Context/Context';
 
@@ -54,7 +54,7 @@ const ProgressBar = () => {
       clearTimeout(hideTimer);
       clearTimeout(contentTimer);
     };
-  }, [location]);
+  }, [location, navigationType, setPageLoading]);
 
   if (!isVisible) return null;
 

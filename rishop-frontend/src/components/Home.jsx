@@ -1,6 +1,5 @@
-import React, { useEffect, useContext, useMemo } from "react";
+import { useContext, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import API from "../axios";
 import AppContext from "../Context/Context";
 
 const Home = () => {

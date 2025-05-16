@@ -1,4 +1,5 @@
-import React, { createContext, useState, useEffect } from 'react';
+import { createContext, useState, useEffect, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import API from '../axios';
 
 const AppContext = createContext();
@@ -18,7 +19,7 @@ export const AppProvider = ({ children }) => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [isDataFetched, setIsDataFetched] = useState(false);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     // Prevent duplicate calls if data is already fetched
     if (isDataFetched && products.length > 0) {
       setIsLoading(false);
@@ -54,7 +55,7 @@ export const AppProvider = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [isDataFetched, products, setIsLoading, setProducts, setFilteredProducts, setDisplayedProducts, setCategories, setIsDataFetched]);
   
   // Fetch products by category
   const fetchProductsByCategory = async (category) => {
@@ -97,7 +98,7 @@ export const AppProvider = ({ children }) => {
   };
   
   // Search products by keyword for dropdown
-  const searchProducts = async (keyword) => {
+  const searchProducts = useCallback(async (keyword) => {
     // Only search if keyword has 2 or more characters
     if (keyword.length < 2) {
       setSearchResults([]);
@@ -138,7 +139,7 @@ export const AppProvider = ({ children }) => {
     } finally {
       setIsSearching(false);
     }
-  };
+  }, [products, setSearchResults, setShowSearchDropdown, setIsSearching]);
   
   // Apply search to main display when user presses Enter
   const applySearch = () => {
@@ -207,7 +208,7 @@ export const AppProvider = ({ children }) => {
     if (savedCart) {
       setCart(JSON.parse(savedCart));
     }
-  }, [isDataFetched]);
+  }, [isDataFetched, fetchData]);
   
   // Effect for handling search with debounce
   useEffect(() => {
@@ -221,7 +222,7 @@ export const AppProvider = ({ children }) => {
     
     // Clean up the timer on each change
     return () => clearTimeout(timer);
-  }, [searchQuery]);
+  }, [searchQuery, searchProducts]);
 
   // Save cart to localStorage whenever it changes
   useEffect(() => {
@@ -301,6 +302,11 @@ export const AppProvider = ({ children }) => {
       {children}
     </AppContext.Provider>
   );
+};
+
+
+AppProvider.propTypes = {
+  children: PropTypes.node.isRequired
 };
 
 export default AppContext;

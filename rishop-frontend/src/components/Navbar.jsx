@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FiShoppingCart, FiSearch, FiMenu, FiX, FiSun, FiMoon } from "react-icons/fi";
 import AppContext from "../Context/Context";
 import Logo from "../assets/Logo.svg";
 
-const Navbar = ({ onSelectCategory }) => {
+const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation(); // Used to determine active navigation link
   const { 
@@ -39,7 +39,7 @@ const Navbar = ({ onSelectCategory }) => {
   };
   
   // Handle clicks outside the search dropdown to close it
-  const searchWrapperRef = React.useRef(null);
+  const searchWrapperRef = useRef(null);
   
   useEffect(() => {
     function handleClickOutside(event) {
@@ -66,7 +66,6 @@ const Navbar = ({ onSelectCategory }) => {
 
   const [theme, setTheme] = useState(getInitialTheme());
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
 
   const toggleTheme = () => {
