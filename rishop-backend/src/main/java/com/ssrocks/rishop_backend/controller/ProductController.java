@@ -10,7 +10,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
@@ -37,11 +36,18 @@ public class ProductController {
         return !products.isEmpty() ? new ResponseEntity<>(products, HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    /*
+    // This endpoint is likely no longer needed as the frontend can use the imageUrl from the Product object directly from Cloudinary.
+    // If you still need to proxy images, this would need to be rewritten to fetch from Cloudinary URL.
     @GetMapping("/product/{id}/image")
     public ResponseEntity<byte[]> getProductImage(@PathVariable int id) {
         System.out.println("Product ID: " + id);
-        return new ResponseEntity<>(productService.getProductById(id).getImageData(), HttpStatus.OK);
+        // Old logic: return new ResponseEntity<>(productService.getProductById(id).getImageData(), HttpStatus.OK);
+        // New logic would involve fetching image from Cloudinary URL stored in product.getImageUrl()
+        // and then returning it. For now, commenting out as direct URL usage is preferred.
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED); // Or simply remove the endpoint
     }
+    */
 
     @PostMapping("/addproduct")
     public ResponseEntity<Product> addProduct(@RequestPart Product product, @RequestPart MultipartFile imageFile){

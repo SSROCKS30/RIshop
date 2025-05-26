@@ -26,10 +26,16 @@ public class Product {
     private Date releaseDate;
     private boolean productAvailable;
     private int stockQuantity;
-    private String imageName;
-    private String imageType;
-    @Lob
-    private byte[] imageData;
+    private String imageUrl;
+    private String publicId;
+
+    @ManyToOne
+    @JoinColumn(name = "uploaded_by", referencedColumnName = "id")
+    private User uploadedBy;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    private Date createdAt;
 
     public Product(int id){
         this.id = id;
