@@ -47,24 +47,16 @@ const Home = () => {
           {productsToDisplay.map((product) => (
             <div className="simple-card" key={product.id}>
               <div className="product-image-container" onClick={() => navigate(`/product/${product.id}`)} style={{ cursor: 'pointer', position: 'relative' }}>
-                {/* Use image data from product object if available, otherwise use a placeholder */}
-                {product.imageData ? (
-                  <img 
-                    className="product-image" 
-                    src={`data:${product.imageType};base64,${product.imageData}`} 
-                    alt={product.name} 
-                  />
-                ) : (
-                  <img 
-                    className="product-image" 
-                    src={`/placeholder.png`} 
-                    alt={product.name} 
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = 'https://placehold.co/300x300?text=No+Image';
-                    }}
-                  />
-                )}
+                {/* Use imageUrl from product object if available, otherwise use a placeholder */}
+                <img 
+                  className="product-image" 
+                  src={product.imageUrl ? product.imageUrl : 'https://placehold.co/300x300?text=' + (product.name || 'No Image')}
+                  alt={product.name || 'Product Image'} 
+                  onError={(e) => {
+                    e.target.onerror = null; // prevent infinite loop
+                    e.target.src = 'https://placehold.co/300x300?text=' + (product.name || 'Error');
+                  }}
+                />
                 {product.stockQuantity <= 0 && (
                   <div style={{
                     position: 'absolute',

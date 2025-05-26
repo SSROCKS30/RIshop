@@ -146,12 +146,12 @@ const Product = () => {
         <div style={{ flex: "1", minWidth: "300px" }}>
           <div style={{ backgroundColor: "var(--bg-accent)", borderRadius: "8px", padding: "1rem", display: "flex", justifyContent: "center", alignItems: "center" }}>
             <img
-              src={`http://localhost:8080/api/product/${id}/image`}
-              alt={product.name}
+              src={product && product.imageUrl ? product.imageUrl : 'https://via.placeholder.com/400x400?text=' + (product?.name || 'Product Image Not Available')}
+              alt={product?.name || 'Product Image'}
               style={{ maxWidth: "100%", maxHeight: "400px", objectFit: "contain" }}
               onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = 'https://via.placeholder.com/400x400?text=' + (product.name || 'Product');
+                e.target.onerror = null; // Prevents infinite loop if fallback also fails
+                e.target.src = 'https://via.placeholder.com/400x400?text=' + (product?.name || 'Error Loading Image');
               }}
             />
           </div>
