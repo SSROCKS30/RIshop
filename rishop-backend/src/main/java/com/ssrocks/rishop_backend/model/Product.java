@@ -34,10 +34,22 @@ public class Product {
     private User uploadedBy;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "created_at", nullable = false, updatable = false)
     private Date createdAt;
 
     public Product(int id){
         this.id = id;
+    }
+
+    @PrePersist
+    protected void onPrePersist() {
+        if (this.createdAt == null) {
+            this.createdAt = new Date(); 
+        }
+        if (this.uploadedBy == null) {
+            User defaultUploader = new User();
+            defaultUploader.setId(1); 
+            this.uploadedBy = defaultUploader;
+        }
     }
 }
