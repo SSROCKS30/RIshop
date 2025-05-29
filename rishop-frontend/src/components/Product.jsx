@@ -5,10 +5,12 @@ import API from "../axios";
 
 const Product = () => {
   const { id } = useParams();
-  const { addToCart, removeFromCart, refreshData } = useContext(AppContext);
+  const { addToCart, cart } = useContext(AppContext);
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [addedToCart, setAddedToCart] = useState(false);
+  const [quantityError, setQuantityError] = useState("");
   const navigate = useNavigate();
 
   // Fetch product data when component mounts or id changes
@@ -50,27 +52,6 @@ const Product = () => {
     fetchProduct();
   }, [id]);
 
-  const deleteProduct = async () => {
-    try {
-      await API.delete(`/product/${id}`);
-      removeFromCart(id);
-      alert("Product deleted successfully");
-      refreshData();
-      navigate("/");
-    } catch (error) {
-      console.error("Error deleting product:", error);
-      alert("Failed to delete product");
-    }
-  };
-
-  const handleEditClick = () => {
-    navigate(`/product/update/${id}`);
-  };
-
-  const [addedToCart, setAddedToCart] = useState(false);
-  const [quantityError, setQuantityError] = useState("");
-  const { cart } = useContext(AppContext);
-
   const handleAddToCart = () => {
     if (product) {
       // Get the actual quantity from the server
@@ -106,8 +87,6 @@ const Product = () => {
       }, 3000);
     }
   };
-  
-
 
   if (loading) {
     return (
@@ -170,7 +149,19 @@ const Product = () => {
             <p>{product.description}</p>
           </div>
 
-          {/* Actions */}
+          {/* Product Details */}
+          <div style={{ marginBottom: "2rem" }}>
+            <h3 style={{ marginBottom: "0.5rem" }}>Details</h3>
+            <div style={{ display: "grid", gap: "0.5rem" }}>
+              <div><strong>Brand:</strong> {product.brand}</div>
+              <div><strong>Category:</strong> {product.category}</div>
+              {product.releaseDate && (
+                <div><strong>Release Date:</strong> {new Date(product.releaseDate).toLocaleDateString()}</div>
+              )}
+            </div>
+          </div>
+
+          {/* Add to Cart Section */}
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             {/* Available stock display */}
             <div style={{ 
@@ -211,36 +202,21 @@ const Product = () => {
                 : (addedToCart ? "Added to Cart" : "Add to Cart")}
             </button>
 
-            <div style={{ display: "flex", gap: "1rem" }}>
-              <button
-                onClick={handleEditClick}
-                style={{
-                  flex: 1,
-                  padding: "0.75rem",
-                  backgroundColor: "var(--bg-accent)",
-                  color: "var(--text-primary)",
-                  border: "none",
-                  borderRadius: "4px",
-                  cursor: "pointer"
-                }}
-              >
-                Update
-              </button>
-              <button
-                onClick={deleteProduct}
-                style={{
-                  flex: 1,
-                  padding: "0.75rem",
-                  backgroundColor: "var(--danger-color)",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "4px",
-                  cursor: "pointer"
-                }}
-              >
-                Delete
-              </button>
-            </div>
+            {/* Continue Shopping Button */}
+            <button
+              onClick={() => navigate('/')}
+              style={{
+                padding: "0.75rem",
+                backgroundColor: "var(--bg-accent)",
+                color: "var(--text-primary)",
+                border: "1px solid var(--border-color)",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontSize: "0.9rem"
+              }}
+            >
+              Continue Shopping
+            </button>
           </div>
         </div>
       </div>

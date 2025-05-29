@@ -1,7 +1,8 @@
 import { useContext, useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppContext from '../Context/Context';
-import { FiUser, FiList, FiPackage, FiEdit3, FiEye, FiTrash2, FiPlus, FiCalendar, FiDollarSign, FiShoppingBag } from 'react-icons/fi';
+import API from '../axios';
+import { FiUser, FiList, FiPackage, FiEdit3, FiEye, FiTrash2, FiPlus, FiCalendar, FiDollarSign, FiShoppingBag, FiLogOut } from 'react-icons/fi';
 import './ProfilePage.css';
 
 const ProfilePage = () => {
@@ -16,7 +17,8 @@ const ProfilePage = () => {
     fetchUserProfile,
     fetchUserProducts,
     fetchUserOrders,
-    authToken
+    authToken,
+    logout
   } = useContext(AppContext);
   
   const [activeTab, setActiveTab] = useState('orders'); // 'orders' or 'products'
@@ -86,6 +88,42 @@ const ProfilePage = () => {
     navigate('/add_product');
   };
 
+  // Handle delete product
+  const handleDeleteProduct = async (productId, productName) => {
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete "${productName}"? This action cannot be undone.`
+    );
+    
+    if (!confirmDelete) return;
+
+    try {
+      // Make API call to delete the product
+      const response = await API.delete(`/product/${productId}`);
+      
+      // If we get here, the deletion was successful
+      await fetchUserProducts(); // Refresh the products list
+      alert(`Product "${productName}" deleted successfully!`);
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      if (error.response?.status === 403) {
+        alert('You can only delete your own products.');
+      } else if (error.response?.status === 404) {
+        alert('Product not found.');
+      } else {
+        alert('Failed to delete product. Please try again.');
+      }
+    }
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    const confirmLogout = window.confirm('Are you sure you want to log out?');
+    if (confirmLogout) {
+      logout(); // This will clear the token and redirect
+      navigate('/login');
+    }
+  };
+
   if (isInitialLoad && isLoadingProfile) {
     return (
       <div className="profile-loading-container">
@@ -109,9 +147,14 @@ const ProfilePage = () => {
           <FiCalendar size={16} />
           Member since: {formatDate(user?.createdAt)}
         </p>
-        <button className="edit-profile-button" onClick={() => console.log('Edit profile - To be implemented')}>
-          <FiEdit3 /> Edit Profile
-        </button>
+        <div className="profile-actions">
+          <button className="edit-profile-button" onClick={() => console.log('Edit profile - To be implemented')}>
+            <FiEdit3 /> Edit Profile
+          </button>
+          <button className="logout-button" onClick={handleLogout}>
+            <FiLogOut /> Logout
+          </button>
+        </div>
       </div>
 
       {/* Profile Stats */}
@@ -274,6 +317,13 @@ const ProfilePage = () => {
                         title="Edit Product"
                       >
                         <FiEdit3 />
+                      </button>
+                      <button 
+                        className="delete-product-button"
+                        onClick={() => handleDeleteProduct(product.id, product.name)}
+                        title="Delete Product"
+                      >
+                        <FiTrash2 />
                       </button>
                     </div>
                   </div>
