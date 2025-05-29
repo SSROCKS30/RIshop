@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -82,6 +83,7 @@ public class CartService {
         // Check if item already exists in cart
         Optional<CartItem> existingItem = cartItemRepository.findByCartAndProduct(cart, product);
         
+        CartItem savedCartItem;
         if (existingItem.isPresent()) {
             // Update existing item quantity
             CartItem cartItem = existingItem.get();
@@ -94,15 +96,21 @@ public class CartService {
             }
             
             cartItem.setQuantity(newQuantity);
-            return cartItemRepository.save(cartItem);
+            savedCartItem = cartItemRepository.save(cartItem);
         } else {
             // Create new cart item
             CartItem cartItem = new CartItem();
             cartItem.setCart(cart);
             cartItem.setProduct(product);
             cartItem.setQuantity(quantity);
-            return cartItemRepository.save(cartItem);
+            savedCartItem = cartItemRepository.save(cartItem);
         }
+        
+        // Update the cart's timestamp by manually setting it and saving
+        cart.setUpdatedAt(new Date());
+        cartRepository.save(cart);
+        
+        return savedCartItem;
     }
 
     /**
@@ -135,6 +143,9 @@ public class CartService {
         if (newQuantity <= 0) {
             // Remove item if quantity is 0 or negative
             cartItemRepository.delete(cartItem);
+            // Update the cart's timestamp by manually setting it and saving
+            cart.setUpdatedAt(new Date());
+            cartRepository.save(cart);
             return null;
         }
 
@@ -144,7 +155,13 @@ public class CartService {
         }
 
         cartItem.setQuantity(newQuantity);
-        return cartItemRepository.save(cartItem);
+        CartItem savedCartItem = cartItemRepository.save(cartItem);
+        
+        // Update the cart's timestamp by manually setting it and saving
+        cart.setUpdatedAt(new Date());
+        cartRepository.save(cart);
+        
+        return savedCartItem;
     }
 
     /**
@@ -168,6 +185,9 @@ public class CartService {
         Optional<CartItem> cartItemOpt = cartItemRepository.findByCartAndProduct(cart, product);
         if (cartItemOpt.isPresent()) {
             cartItemRepository.delete(cartItemOpt.get());
+            // Update the cart's timestamp by manually setting it and saving
+            cart.setUpdatedAt(new Date());
+            cartRepository.save(cart);
         }
     }
 
@@ -180,6 +200,9 @@ public class CartService {
         Cart cart = getUserCart(user);
         if (cart != null) {
             cartItemRepository.deleteByCart(cart);
+            // Update the cart's timestamp by manually setting it and saving
+            cart.setUpdatedAt(new Date());
+            cartRepository.save(cart);
         }
     }
 
