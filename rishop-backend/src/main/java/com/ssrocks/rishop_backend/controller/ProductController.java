@@ -37,11 +37,9 @@ public class ProductController {
 
     @GetMapping("/products/{keyword}")
     public ResponseEntity<List<Product>> getProductByKeyword(@PathVariable String keyword){
-        System.out.println("Keyword: " + keyword);
         List<Product> products = productService.getProductByKeyword(keyword);
         return !products.isEmpty() ? new ResponseEntity<>(products, HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
-
 
     @PostMapping("/addproduct")
     public ResponseEntity<Product> addProduct(
@@ -49,7 +47,6 @@ public class ProductController {
             @RequestPart MultipartFile imageFile,
             Authentication authentication) {
         try {
-
             String username = authentication.getName();
             User currentUser = userService.findByUsername(username);
             
@@ -58,14 +55,11 @@ public class ProductController {
             }
 
             product.setUploadedBy(currentUser);
-            
             Product savedProduct = productService.addProduct(product, imageFile);
             return new ResponseEntity<>(savedProduct, HttpStatus.CREATED);
         } catch (IOException e) {
-            System.err.println("Error adding product: " + e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (Exception e) {
-            System.err.println("Unexpected error adding product: " + e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -84,7 +78,6 @@ public class ProductController {
             if (product.getId() == -1) {
                 return new ResponseEntity<>("Product not found", HttpStatus.NOT_FOUND);
             }
-            
 
             if (!Objects.equals(product.getUploadedBy().getId(), currentUser.getId())) {
                 return new ResponseEntity<>("You can only delete your own products", HttpStatus.FORBIDDEN);
@@ -93,50 +86,51 @@ public class ProductController {
             productService.deleteProduct(id);
             return new ResponseEntity<>("Product deleted successfully", HttpStatus.OK);
         } catch (Exception e) {
-            System.err.println("Error deleting product: " + e.getMessage());
             return new ResponseEntity<>("Error deleting product", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/products/category/{category}")
     public ResponseEntity<List<Product>> getProductsByCategory(@PathVariable String category) {
-        List<Product> product = productService.getProductByCategory(category);
-        return product.isEmpty() ? new ResponseEntity<>(HttpStatus.NOT_FOUND) : new ResponseEntity<>(product, HttpStatus.OK);
+        List<Product> products = productService.getProductByCategory(category);
+        return products.isEmpty() ? new ResponseEntity<>(HttpStatus.NOT_FOUND) : new ResponseEntity<>(products, HttpStatus.OK);
     }
 
     @PutMapping("/product")
-    public ResponseEntity<String> updateProductWithImage(
+    public ResponseEntity<String> updateProduct(
             @RequestPart Product product, 
-            @RequestPart MultipartFile imageFile,
+            @RequestPart(required = false) MultipartFile imageFile,
             Authentication authentication) {
         try {
-
             String username = authentication.getName();
             User currentUser = userService.findByUsername(username);
             
             if (currentUser == null) {
                 return new ResponseEntity<>("User not found", HttpStatus.UNAUTHORIZED);
             }
-            
 
             Product existingProduct = productService.getProductById(product.getId());
             if (existingProduct.getId() == -1) {
                 return new ResponseEntity<>("Product not found", HttpStatus.NOT_FOUND);
             }
-            
 
             if (!Objects.equals(existingProduct.getUploadedBy().getId(), currentUser.getId())) {
                 return new ResponseEntity<>("You can only update your own products", HttpStatus.FORBIDDEN);
             }
+            
             product.setUploadedBy(existingProduct.getUploadedBy());
             
-            productService.updateProductWithImage(product, imageFile);
+            // Handle both cases - with or without image
+            if (imageFile != null && !imageFile.isEmpty()) {
+                productService.updateProductWithImage(product, imageFile);
+            } else {
+                productService.updateProductWithoutImage(product);
+            }
+            
             return new ResponseEntity<>("Product updated successfully", HttpStatus.OK);
         } catch (IOException e) {
-            System.err.println("Error updating product: " + e.getMessage());
             return new ResponseEntity<>("Error updating product", HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (Exception e) {
-            System.err.println("Unexpected error updating product: " + e.getMessage());
             return new ResponseEntity<>("Error updating product", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -151,24 +145,20 @@ public class ProductController {
             if (currentUser == null) {
                 return new ResponseEntity<>("User not found", HttpStatus.UNAUTHORIZED);
             }
-            
 
             Product existingProduct = productService.getProductById(product.getId());
             if (existingProduct.getId() == -1) {
                 return new ResponseEntity<>("Product not found", HttpStatus.NOT_FOUND);
             }
-            
 
             if (!Objects.equals(existingProduct.getUploadedBy().getId(), currentUser.getId())) {
                 return new ResponseEntity<>("You can only update your own products", HttpStatus.FORBIDDEN);
             }
 
             product.setUploadedBy(existingProduct.getUploadedBy());
-            
             productService.updateProductWithoutImage(product);
             return new ResponseEntity<>("Product updated successfully", HttpStatus.OK);
         } catch (Exception e) {
-            System.err.println("Error updating product: " + e.getMessage());
             return new ResponseEntity<>("Error updating product", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

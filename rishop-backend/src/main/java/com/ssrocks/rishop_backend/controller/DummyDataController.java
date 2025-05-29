@@ -57,15 +57,31 @@ public class DummyDataController {
         productRepository.saveAll(products);
 
         // Create Carts
-        Cart cart1 = new Cart(0, user1, new Date());
-        Cart cart2 = new Cart(0, user2, new Date());
+        Cart cart1 = new Cart();
+        cart1.setUser(user1);
+        
+        Cart cart2 = new Cart();
+        cart2.setUser(user2);
+        
         cartRepository.saveAll(Arrays.asList(cart1, cart2));
 
         // Create Cart Items
         if (!products.isEmpty()) {
-            CartItem cartItem1 = new CartItem(0, cart1, products.get(random.nextInt(products.size())), 1);
-            CartItem cartItem2 = new CartItem(0, cart1, products.get(random.nextInt(products.size())), 2);
-            CartItem cartItem3 = new CartItem(0, cart2, products.get(random.nextInt(products.size())), 1);
+            CartItem cartItem1 = new CartItem();
+            cartItem1.setCart(cart1);
+            cartItem1.setProduct(products.get(random.nextInt(products.size())));
+            cartItem1.setQuantity(1);
+            
+            CartItem cartItem2 = new CartItem();
+            cartItem2.setCart(cart1);
+            cartItem2.setProduct(products.get(random.nextInt(products.size())));
+            cartItem2.setQuantity(2);
+            
+            CartItem cartItem3 = new CartItem();
+            cartItem3.setCart(cart2);
+            cartItem3.setProduct(products.get(random.nextInt(products.size())));
+            cartItem3.setQuantity(1);
+            
             cartItemRepository.saveAll(Arrays.asList(cartItem1, cartItem2, cartItem3));
         }
 

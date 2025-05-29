@@ -1,9 +1,12 @@
 package com.ssrocks.rishop_backend.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.Date;
 
 @Entity
 @Data
@@ -17,6 +20,7 @@ public class CartItem {
 
     @ManyToOne
     @JoinColumn(name = "cart_id", referencedColumnName = "id")
+    @JsonBackReference
     private Cart cart;
 
     @ManyToOne
@@ -25,4 +29,25 @@ public class CartItem {
 
     @Column(nullable = false)
     private int quantity;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Date createdAt;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "updated_at")
+    private Date updatedAt;
+
+    @PrePersist
+    protected void onPrePersist() {
+        if (this.createdAt == null) {
+            this.createdAt = new Date();
+        }
+        this.updatedAt = new Date();
+    }
+
+    @PreUpdate
+    protected void onPreUpdate() {
+        this.updatedAt = new Date();
+    }
 } 
