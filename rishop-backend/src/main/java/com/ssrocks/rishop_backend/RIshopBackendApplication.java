@@ -9,5 +9,4 @@ public class RIshopBackendApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(RIshopBackendApplication.class, args);
 	}
-
 }

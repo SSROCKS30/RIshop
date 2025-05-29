@@ -33,4 +33,11 @@ public class User {
     public User(int id) {
         this.id = id;
     }
+
+    @PrePersist
+    protected void onPrePersist() {
+        if (this.createdAt == null) {
+            this.createdAt = new Date();
+        }
+    }
 } 

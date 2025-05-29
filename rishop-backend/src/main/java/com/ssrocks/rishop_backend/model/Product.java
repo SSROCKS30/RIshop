@@ -46,10 +46,7 @@ public class Product {
         if (this.createdAt == null) {
             this.createdAt = new Date(); 
         }
-        if (this.uploadedBy == null) {
-            User defaultUploader = new User();
-            defaultUploader.setId(1); 
-            this.uploadedBy = defaultUploader;
-        }
+        // Removed the automatic setting of uploadedBy to user ID 1
+        // This should be set explicitly in the controller based on authenticated user
     }
 }

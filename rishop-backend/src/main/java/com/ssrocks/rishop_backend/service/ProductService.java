@@ -3,6 +3,7 @@ package com.ssrocks.rishop_backend.service;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.ssrocks.rishop_backend.model.Product;
+import com.ssrocks.rishop_backend.model.User;
 import com.ssrocks.rishop_backend.repository.ProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -148,5 +149,16 @@ public class ProductService {
             logger.warn("Product not found for updateWithoutImage: {}", productDetailsToUpdate.getId());
             throw new RuntimeException("Product not found with id: " + productDetailsToUpdate.getId());
         }
+    }
+
+    /**
+     * Get all products uploaded by a specific user
+     * @param user - The user whose products to retrieve
+     * @return List of products uploaded by the user
+     */
+    @Transactional(readOnly = true)
+    public List<Product> getProductsByUser(User user) {
+        System.out.println("Check getProductByUserService");
+        return productRepository.findByUploadedBy(user);
     }
 }
