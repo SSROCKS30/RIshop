@@ -42,28 +42,21 @@ public class ProductController {
         return !products.isEmpty() ? new ResponseEntity<>(products, HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    /**
-     * Add a new product with the current authenticated user as the uploader
-     * @param product - Product details to add
-     * @param imageFile - Product image file
-     * @param authentication - Current authenticated user
-     * @return ResponseEntity with the saved product
-     */
+
     @PostMapping("/addproduct")
     public ResponseEntity<Product> addProduct(
             @RequestPart Product product, 
             @RequestPart MultipartFile imageFile,
             Authentication authentication) {
         try {
-            // Get the current authenticated user
+
             String username = authentication.getName();
             User currentUser = userService.findByUsername(username);
             
             if (currentUser == null) {
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
-            
-            // Set the authenticated user as the uploader
+
             product.setUploadedBy(currentUser);
             
             Product savedProduct = productService.addProduct(product, imageFile);
@@ -80,21 +73,19 @@ public class ProductController {
     @DeleteMapping("/product/{id}")
     public ResponseEntity<String> deleteProduct(@PathVariable int id, Authentication authentication) {
         try {
-            // Get the current authenticated user
             String username = authentication.getName();
             User currentUser = userService.findByUsername(username);
             
             if (currentUser == null) {
                 return new ResponseEntity<>("User not found", HttpStatus.UNAUTHORIZED);
             }
-            
-            // Get the product to check ownership
+
             Product product = productService.getProductById(id);
             if (product.getId() == -1) {
                 return new ResponseEntity<>("Product not found", HttpStatus.NOT_FOUND);
             }
             
-            // Check if the current user is the owner of the product
+
             if (!Objects.equals(product.getUploadedBy().getId(), currentUser.getId())) {
                 return new ResponseEntity<>("You can only delete your own products", HttpStatus.FORBIDDEN);
             }
@@ -119,7 +110,7 @@ public class ProductController {
             @RequestPart MultipartFile imageFile,
             Authentication authentication) {
         try {
-            // Get the current authenticated user
+
             String username = authentication.getName();
             User currentUser = userService.findByUsername(username);
             
@@ -127,18 +118,16 @@ public class ProductController {
                 return new ResponseEntity<>("User not found", HttpStatus.UNAUTHORIZED);
             }
             
-            // Get the existing product to check ownership
+
             Product existingProduct = productService.getProductById(product.getId());
             if (existingProduct.getId() == -1) {
                 return new ResponseEntity<>("Product not found", HttpStatus.NOT_FOUND);
             }
             
-            // Check if the current user is the owner of the product
+
             if (!Objects.equals(existingProduct.getUploadedBy().getId(), currentUser.getId())) {
                 return new ResponseEntity<>("You can only update your own products", HttpStatus.FORBIDDEN);
             }
-            
-            // Ensure the uploadedBy remains the same (don't allow changing ownership)
             product.setUploadedBy(existingProduct.getUploadedBy());
             
             productService.updateProductWithImage(product, imageFile);
@@ -157,26 +146,23 @@ public class ProductController {
             @RequestBody Product product,
             Authentication authentication) {
         try {
-            // Get the current authenticated user
             String username = authentication.getName();
             User currentUser = userService.findByUsername(username);
-            
             if (currentUser == null) {
                 return new ResponseEntity<>("User not found", HttpStatus.UNAUTHORIZED);
             }
             
-            // Get the existing product to check ownership
+
             Product existingProduct = productService.getProductById(product.getId());
             if (existingProduct.getId() == -1) {
                 return new ResponseEntity<>("Product not found", HttpStatus.NOT_FOUND);
             }
             
-            // Check if the current user is the owner of the product
+
             if (!Objects.equals(existingProduct.getUploadedBy().getId(), currentUser.getId())) {
                 return new ResponseEntity<>("You can only update your own products", HttpStatus.FORBIDDEN);
             }
-            
-            // Ensure the uploadedBy remains the same (don't allow changing ownership)
+
             product.setUploadedBy(existingProduct.getUploadedBy());
             
             productService.updateProductWithoutImage(product);

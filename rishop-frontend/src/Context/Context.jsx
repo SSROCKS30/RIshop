@@ -25,9 +25,12 @@ export const AppProvider = ({ children }) => {
   const [isAuthLoading, setIsAuthLoading] = useState(true); // To track auth validation
 
   // Profile-related state
-  const [userProducts, setUserProducts] = useState([]); // Products uploaded by user
-  const [userOrders, setUserOrders] = useState([]); // Orders made by user
+  const [userProducts, setUserProducts] = useState([]);
+  const [userOrders, setUserOrders] = useState([]);
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
+
+  // Cart-related state
+  const [cartLoading, setCartLoading] = useState(false);
 
   // Theme state
   const getInitialTheme = useCallback(() => {
@@ -65,7 +68,7 @@ export const AppProvider = ({ children }) => {
   const logout = () => {
     setAuthToken(null);
     setUser(null);
-    setCart([]); // Optionally clear cart on logout
+    setCart([]); // Clear cart on logout
     // Any other cleanup
     // Navigate to login page (handled by ProtectedRoute)
   };
@@ -348,11 +351,6 @@ export const AppProvider = ({ children }) => {
         setIsDataFetched(false); // Reset data fetched flag
         setIsLoading(false);
     }
-    
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      setCart(JSON.parse(savedCart));
-    }
   }, [authToken, fetchData, isDataFetched]);
   
   // Effect for handling search with debounce
@@ -372,45 +370,152 @@ export const AppProvider = ({ children }) => {
     }
   }, [searchQuery, searchProducts, authToken]);
 
-  // Save cart to localStorage whenever it changes
+  // Fetch cart from backend
+  const fetchCart = useCallback(async () => {
+    if (!authToken) {
+      setCart([]);
+      return;
+    }
+
+    try {
+      setCartLoading(true);
+      const response = await API.get('/cart');
+      const cartData = response.data;
+      
+      // Transform backend cart data to frontend format
+      const cartItems = cartData.cartItems.map(item => ({
+        id: item.product.id,
+        name: item.product.name,
+        description: item.product.description,
+        brand: item.product.brand,
+        category: item.product.category,
+        price: parseFloat(item.product.price),
+        imageUrl: item.product.imageUrl,
+        quantity: item.quantity,
+        stockQuantity: item.product.stockQuantity
+      }));
+      
+      setCart(cartItems);
+    } catch (error) {
+      console.error('Error fetching cart:', error);
+      if (error.response?.status === 401) {
+        setAuthToken(null);
+      }
+      setCart([]);
+    } finally {
+      setCartLoading(false);
+    }
+  }, [authToken]);
+
+  // Load cart when user logs in
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cart));
-  }, [cart]);
-
-  const addToCart = (product) => {
-    const existingProduct = cart.find(item => item.id === product.id);
-    
-    if (existingProduct) {
-      // If product already in cart, increase quantity
-      setCart(cart.map(item => 
-        item.id === product.id 
-          ? { ...item, quantity: item.quantity + 1 } 
-          : item
-      ));
+    if (authToken) {
+      fetchCart();
     } else {
-      // Add new product to cart with quantity 1
-      setCart([...cart, { ...product, quantity: 1 }]);
+      setCart([]);
+    }
+  }, [authToken, fetchCart]);
+
+  const addToCart = async (product) => {
+    if (!authToken) {
+      console.error('User not authenticated');
+      return;
+    }
+
+    try {
+      setCartLoading(true);
+      await API.post(`/cart/add/${product.id}`, null, {
+        params: { quantity: 1 }
+      });
+      
+      // Refresh cart after adding
+      await fetchCart();
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      if (error.response?.status === 401) {
+        setAuthToken(null);
+      }
+      // Show user-friendly error message
+      const errorMessage = error.response?.data || 'Failed to add item to cart';
+      alert(errorMessage);
+    } finally {
+      setCartLoading(false);
     }
   };
 
-  const removeFromCart = (productId) => {
-    setCart(cart.filter(item => item.id !== productId));
-  };
+  const removeFromCart = async (productId) => {
+    if (!authToken) {
+      console.error('User not authenticated');
+      return;
+    }
 
-  const updateCartItemQuantity = (productId, quantity) => {
-    if (quantity <= 0) {
-      removeFromCart(productId);
-    } else {
-      setCart(cart.map(item => 
-        item.id === productId 
-          ? { ...item, quantity: quantity } 
-          : item
-      ));
+    try {
+      setCartLoading(true);
+      await API.delete(`/cart/item/${productId}`);
+      
+      // Refresh cart after removing
+      await fetchCart();
+    } catch (error) {
+      console.error('Error removing from cart:', error);
+      if (error.response?.status === 401) {
+        setAuthToken(null);
+      }
+      // Show user-friendly error message
+      const errorMessage = error.response?.data || 'Failed to remove item from cart';
+      alert(errorMessage);
+    } finally {
+      setCartLoading(false);
     }
   };
 
-  const clearCart = () => {
-    setCart([]);
+  const updateCartItemQuantity = async (productId, quantity) => {
+    if (!authToken) {
+      console.error('User not authenticated');
+      return;
+    }
+
+    try {
+      setCartLoading(true);
+      await API.put(`/cart/item/${productId}/quantity/${quantity}`);
+      
+      // Refresh cart after updating
+      await fetchCart();
+    } catch (error) {
+      console.error('Error updating cart item quantity:', error);
+      if (error.response?.status === 401) {
+        setAuthToken(null);
+      }
+      // Show user-friendly error message
+      const errorMessage = error.response?.data || 'Failed to update cart item quantity';
+      alert(errorMessage);
+    } finally {
+      setCartLoading(false);
+    }
+  };
+
+  const clearCart = async () => {
+    if (!authToken) {
+      console.error('User not authenticated');
+      return;
+    }
+
+    try {
+      setCartLoading(true);
+      await API.delete('/cart/clear');
+      
+      // Clear local cart state
+      setCart([]);
+    } catch (error) {
+      console.error('Error clearing cart:', error);
+      if (error.response?.status === 401) {
+        setAuthToken(null);
+      }
+      // Show user-friendly error message
+      const errorMessage = error.response?.data || 'Failed to clear cart';
+      alert(errorMessage);
+    } finally {
+      setCartLoading(false);
+    }
   };
 
   const refreshData = () => {
@@ -521,6 +626,9 @@ export const AppProvider = ({ children }) => {
       userProducts,
       userOrders,
       isLoadingProfile,
+      // Cart-related state and functions
+      cartLoading,
+      fetchCart,
       fetchData, 
       fetchProductsByCategory,
       searchProducts,

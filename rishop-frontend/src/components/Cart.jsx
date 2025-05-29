@@ -176,7 +176,7 @@ const Cart = () => {
                 {/* Product Image */}
                 <div className="cart-item-image">
                   <img
-                    src={`http://localhost:8080/api/product/${item.id}/image`}
+                    src={item.imageUrl || 'https://via.placeholder.com/60x60?text=' + (item.name || 'Product')}
                     alt={item.name}
                     style={{ width: "60px", height: "60px", objectFit: "contain" }}
                     onError={(e) => {

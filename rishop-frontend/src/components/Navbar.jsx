@@ -232,7 +232,7 @@ const Navbar = () => {
                       >
                         <div className="search-result-image">
                           <img 
-                            src={`http://localhost:8080/api/product/${product.id}/image`} 
+                            src={product.imageUrl || 'https://via.placeholder.com/40x40?text=' + product.name}
                             alt={product.name}
                             onError={(e) => {
                               e.target.onerror = null;

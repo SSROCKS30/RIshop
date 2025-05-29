@@ -65,7 +65,7 @@ const UpdateProduct = () => {
         });
         
         // Set current image URL
-        setCurrentImageUrl(`http://localhost:8080/api/product/${id}/image`);
+        setCurrentImageUrl(product.imageUrl || null);
         
       } catch (error) {
         console.error("Error fetching product:", error);
