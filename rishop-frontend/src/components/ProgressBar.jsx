@@ -7,7 +7,7 @@ const ProgressBar = () => {
   const [isVisible, setIsVisible] = useState(false);
   const location = useLocation();
   const navigationType = useNavigationType(); // POP for back/forward navigation, PUSH for normal navigation
-  const { setPageLoading } = useContext(AppContext);
+  const { showPageLoading, hidePageLoading } = useContext(AppContext);
   const prevPathRef = useRef(location.pathname);
 
   useEffect(() => {
@@ -26,7 +26,7 @@ const ProgressBar = () => {
     // Only show loading overlay for forward navigation (not when going back)
     const isBackNavigation = navigationType === 'POP';
     if (!isBackNavigation) {
-      setPageLoading(true); // Set loading state to true
+      showPageLoading();
     }
     
     // Simulate progress with slightly longer times
@@ -42,7 +42,7 @@ const ProgressBar = () => {
     
     // Delay showing the page content
     const contentTimer = setTimeout(() => {
-      setPageLoading(false); // Set loading state to false after delay
+      hidePageLoading();
     }, 900);
     
     // Clean up timers
@@ -54,7 +54,7 @@ const ProgressBar = () => {
       clearTimeout(hideTimer);
       clearTimeout(contentTimer);
     };
-  }, [location, navigationType, setPageLoading]);
+  }, [location, navigationType, showPageLoading, hidePageLoading]);
 
   if (!isVisible) return null;
 

@@ -1,7 +1,7 @@
 import { useEffect, useState, useContext, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FiShoppingCart, FiSearch, FiMenu, FiX, FiSun, FiMoon } from "react-icons/fi";
+import { FiShoppingCart, FiSearch, FiMenu, FiX, FiSun, FiMoon, FiUser } from "react-icons/fi";
 import AppContext from "../Context/Context";
 import Logo from "../assets/Logo.svg";
 
@@ -23,8 +23,17 @@ const Navbar = () => {
     categories,
     selectedCategory,
     fetchProductsByCategory,
-    setPageLoading
+    showPageLoading,
+    hidePageLoading,
+    theme, // Get theme from context
+    toggleTheme, // Get toggleTheme from context
+    // Real authentication state from context
+    authToken,
+    user
   } = useContext(AppContext);
+  
+  // Check if user is authenticated
+  const isAuthenticated = !!authToken;
   
   // Function to handle clicking on a search result
   const handleSearchResultClick = (e, productId) => {
@@ -59,30 +68,15 @@ const Navbar = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showSearchDropdown, closeSearchDropdown]);
-  const getInitialTheme = () => {
-    const storedTheme = localStorage.getItem("theme");
-    return storedTheme ? storedTheme : "light-theme";
-  };
 
-  const [theme, setTheme] = useState(getInitialTheme());
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
-
-  const toggleTheme = () => {
-    const newTheme = theme === "dark-theme" ? "light-theme" : "dark-theme";
-    setTheme(newTheme);
-    localStorage.setItem("theme", newTheme);
-  };
 
   // Update cart count when cart changes
   useEffect(() => {
     const count = cart.reduce((total, item) => total + (item.quantity || 1), 0);
     setCartCount(count);
   }, [cart]);
-
-  useEffect(() => {
-    document.body.className = theme;
-  }, [theme]);
 
   return (
     <header className="navbar-wrapper">
@@ -103,12 +97,15 @@ const Navbar = () => {
             <Link 
               to="/" 
               className="navbar-brand" 
-              onClick={() => {
+              onClick={async () => {
                 resetSearch();
                 if (selectedCategory) {
-                  setPageLoading(true);
-                  fetchProductsByCategory('');
-                  setTimeout(() => setPageLoading(false), 800);
+                  showPageLoading();
+                  try {
+                    await fetchProductsByCategory('');
+                  } finally {
+                    hidePageLoading();
+                  }
                 }
               }}
               style={{ display: "flex", alignItems: "center", gap: "10px" }}
@@ -145,12 +142,15 @@ const Navbar = () => {
                 <Link 
                   to="/" 
                   className={`nav-link ${location.pathname === '/' ? 'active' : ''}`} 
-                  onClick={() => {
+                  onClick={async () => {
                     resetSearch();
                     if (selectedCategory) {
-                      setPageLoading(true);
-                      fetchProductsByCategory('');
-                      setTimeout(() => setPageLoading(false), 800);
+                      showPageLoading();
+                      try {
+                        await fetchProductsByCategory('');
+                      } finally {
+                        hidePageLoading();
+                      }
                     }
                   }}
                 >
@@ -172,11 +172,14 @@ const Navbar = () => {
                 <div className="category-dropdown-menu">
                   <div 
                     className={`dropdown-item ${!selectedCategory ? 'active' : ''}`}
-                    onClick={() => {
-                      setPageLoading(true);
-                      fetchProductsByCategory('');
-                      navigate('/');
-                      setTimeout(() => setPageLoading(false), 800);
+                    onClick={async () => {
+                      showPageLoading();
+                      try {
+                        await fetchProductsByCategory('');
+                        navigate('/');
+                      } finally {
+                        hidePageLoading();
+                      }
                     }}
                   >
                     All Products
@@ -185,11 +188,14 @@ const Navbar = () => {
                     <div 
                       key={category} 
                       className={`dropdown-item ${selectedCategory === category ? 'active' : ''}`}
-                      onClick={() => {
-                        setPageLoading(true);
-                        fetchProductsByCategory(category);
-                        navigate('/');
-                        setTimeout(() => setPageLoading(false), 800);
+                      onClick={async () => {
+                        showPageLoading();
+                        try {
+                          await fetchProductsByCategory(category);
+                          navigate('/');
+                        } finally {
+                          hidePageLoading();
+                        }
                       }}
                     >
                       {category}
@@ -280,6 +286,19 @@ const Navbar = () => {
                 {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
               </Link>
             </motion.div>
+
+            {/* Profile Link - Visible if authenticated */}
+            {isAuthenticated && (
+              <motion.div 
+                className="profile-link-button"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <Link to="/profile" className="profile-link">
+                  <FiUser />
+                </Link>
+              </motion.div>
+            )}
           </div>
         </div>
       </motion.nav>
