@@ -6,6 +6,7 @@ import com.ssrocks.rishop_backend.model.Order;
 import com.ssrocks.rishop_backend.service.JwtService;
 import com.ssrocks.rishop_backend.service.UserService;
 import com.ssrocks.rishop_backend.service.ProductService;
+import com.ssrocks.rishop_backend.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,6 +31,9 @@ public class UserController {
 
     @Autowired
     private ProductService productService;
+
+    @Autowired
+    private OrderService orderService;
 
     @PostMapping("/register")
     public String register(@RequestBody User user) {
@@ -127,11 +131,7 @@ public class UserController {
             
             if (user != null) {
                 // Get orders placed by this user
-                // Note: You'll need to implement getOrdersByUser in OrderService
-                // List<Order> orders = orderService.getOrdersByUser(user);
-                
-                // For now, returning empty list until OrderService is implemented
-                List<Order> orders = List.of(); // Empty list placeholder
+                List<Order> orders = orderService.getOrdersByUser(user);
                 return ResponseEntity.ok(orders);
             } else {
                 return ResponseEntity.notFound().build();
