@@ -62,8 +62,20 @@ const ProfilePage = () => {
   };
 
   // Get status class for orders
-  const getStatusClass = (status) => {
+  const getOrderStatus = (order) => {
+    // Determine status based on order fields
+    if (order.completedAt) {
+      return 'Completed';
+    } else if (order.orderDate) {
+      return 'Pending';
+    }
+    return 'Processing';
+  };
+
+  const getStatusClass = (order) => {
+    const status = getOrderStatus(order);
     switch (status?.toLowerCase()) {
+      case 'completed': return 'status-delivered';
       case 'delivered': return 'status-delivered';
       case 'shipped': return 'status-shipped';
       case 'processing': return 'status-processing';
@@ -220,8 +232,8 @@ const ProfilePage = () => {
                   <div key={order.id} className="order-item card-style">
                     <div className="order-header">
                       <h4>Order #{order.id}</h4>
-                      <span className={`order-status ${getStatusClass(order.status)}`}>
-                        {order.status || 'Pending'}
+                      <span className={`order-status ${getStatusClass(order)}`}>
+                        {getOrderStatus(order) || 'Pending'}
                       </span>
                     </div>
                     <div className="order-details">

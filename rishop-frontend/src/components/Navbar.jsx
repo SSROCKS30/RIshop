@@ -1,8 +1,9 @@
 import { useEffect, useState, useContext, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FiShoppingCart, FiSearch, FiMenu, FiX, FiSun, FiMoon, FiUser } from "react-icons/fi";
+import { FiShoppingCart, FiSearch, FiMenu, FiX, FiSun, FiMoon, FiUser, FiMessageCircle } from "react-icons/fi";
 import AppContext from "../Context/Context";
+import ChatContext from "../Context/ChatContext";
 import Logo from "../assets/Logo.svg";
 
 const Navbar = () => {
@@ -31,6 +32,9 @@ const Navbar = () => {
     authToken,
     user
   } = useContext(AppContext);
+
+  // Get chat notifications
+  const { notifications } = useContext(ChatContext);
   
   // Check if user is authenticated
   const isAuthenticated = !!authToken;
@@ -275,6 +279,22 @@ const Navbar = () => {
             >
               {theme === "dark-theme" ? <FiSun /> : <FiMoon />}
             </motion.button>
+
+            {/* Messages Link - Visible if authenticated */}
+            {isAuthenticated && (
+              <motion.div 
+                className="messages-button"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <Link to="/chat" className="messages-link">
+                  <FiMessageCircle />
+                  {notifications.totalNotifications > 0 && (
+                    <span className="messages-badge">{notifications.totalNotifications}</span>
+                  )}
+                </Link>
+              </motion.div>
+            )}
 
             <motion.div 
               className="cart-button"
